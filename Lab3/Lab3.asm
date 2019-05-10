@@ -12,7 +12,12 @@
 # 
 # Notes:       This program is intended to be run from the MARS IDE.
 # This program caluclates the factorial of numbers from 0 - 10
-# Outputs 
+# First outputs "\nEnter an integer between 0 and 10: "
+# Then reads user input, if the input is 0 - 10 it continues, else it calls StartOver and restarts
+# Then it prints out the input and " != "
+# Then it calculates the factorial using a loop
+# Then it prints out the factorial
+# Once the factorial is printed, syscall 10 closes the program
 ##########################################################################
 # REGISTER USAGE
 # $t0: user input
