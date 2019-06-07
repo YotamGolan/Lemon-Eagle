@@ -177,12 +177,20 @@ take_turn: nop
     
     # some code
     
-    jal    make_bet
-    jal    win_or_lose
-    
-    # some code
-    
-    jal    print_array
+   beq $a3, 1, Betjump
+	beq $a3, 2, Winjump
+	beq $a3, 3, Printjump
+    	j end_game
+	Betjump:
+	jal    make_bet
+	j Fin
+	Winjump:
+	jal    win_or_lose
+	j Fin
+	Printjump:
+	jal    print_array
+	j Fin
+	Fin:
 
     # some code
   
@@ -214,8 +222,8 @@ take_turn: nop
 #    --> no extra credit: replaced by -1
 #    --> extra credit:    removed from array
 #  
-# arguments:  $a0 - address of first element in array
-#             $a1 - current score of user
+# arguments:  $a0 - current score of user
+#             $a1 - address of first element in array
 #
 # return:     $v0 - updated score
 #--------------------------------------------------------------------
@@ -265,7 +273,7 @@ make_bet: nop
 # Finds max element in array, returns index of the max value.
 # Called from make_bet.
 # 
-# arguments:  $a0 - array
+# arguments:  $a0 - address of first element in array
 #
 # returns:    $v0 - index of the maximum element in the array
 #             $v1 - value of the maximum element in the array
@@ -279,12 +287,20 @@ make_bet: nop
 find_max: nop
 
     # some code
-    
-    li $v0 0xdeadbeef       # setting test return values, remove these 2 lines
-    li $v1 0xbaadcafe
+    move $t0, $a0
+    FindMaxLoop:
+	lw $t1, ($t0)
+	beqz $t1 SizeOut
+	bgt $t1, $v1, Bigger
+	j Smaller
+	Bigger:
+	move $v1, $t1
+	move $v0, $t0
+	Smaller:
+	j FindMaxLoop
+
 
     jr     $ra
-
 
 #--------------------------------------------------------------------
 # win_or_lose
@@ -347,15 +363,36 @@ cheat_header: .ascii  "------------------------------"
 .text
 print_array: nop
 
-    # some code
+	move $t0, $a0			#Saves array start Location	
     
-    addiu  $v0  $zero  4           # print header
-    la     $a0  cheat_header
-    syscall
+	addiu  $v0  $zero  4 		# print header
+	la     $a0  cheat_header
+	syscall
     
-    # some code
+    	
     
-    jr     $ra
+	ArrayPrintLoop:
+	lw $t1, ($t0)
+	beqz $t1 SizeOut
+	
+	li $v0, 1
+	move $a0, $t2
+	syscall
+	
+	li $v0, 4
+	la $a0  array_spacer
+	syscall
+	
+	li $v0, 1
+	move $a0, $t1
+	syscall
+	
+	addi $t2, $t2, 1
+	addi $t0, $t0, 4
+	j ArrayPrintLoop
+    
+	jr     $ra
+
 
 
 #--------------------------------------------------------------------

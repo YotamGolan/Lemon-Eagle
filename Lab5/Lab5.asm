@@ -229,16 +229,34 @@ take_turn: nop
 #--------------------------------------------------------------------
 #
 # REGISTER USE
-# 
+# $t7, t8 temporarily save user input
+# $a0, v0 syscalls 
+# $t9 stores size of array
+# $t5 stores location of largest index
 #--------------------------------------------------------------------
 
 
 .data
+new_line:      .asciiz "\n"
 bet_header:   .ascii  "------------------------------"
               .asciiz "\nMAKE A BET\n\n"
             
 score_header: .ascii  "------------------------------"
               .asciiz "\nCURRENT SCORE\n\n"
+              
+point_total1: .asciiz "You currently have "      
+point_total2: .ascii " points.\n"  
+	      .asciiz "How many points would you like to bet? "     
+	      
+over_bet:     .asciiz "\nSorry, your bet exceeds your current worth.\n\n"
+valid_indices:.asciiz "Valid indices for this array are 0 - "
+index_guess:   .asciiz ". \nWhich index do you believe contains the maximum value? "
+wrong_guess:   .asciiz "Your guess is incorrect! The maximum value is not in index "
+point_loss:    .asciiz ". \n\nYou lost "
+point_loss2:    .asciiz " points."
+
+right_guess:   .asciiz "Score! Index "
+right_guess2:  .asciiz " has the maximum value in the array."
             
 # add more strings
 
@@ -249,19 +267,80 @@ make_bet: nop
     sw     $ra  ($sp)
 
 
-    # some code
+    addi $t7 $a0 0
+    move $t8 $a1			#Stores values in temp storage
+    
+    move $a0 $t8
+    jal get_array_size
+    move $t9 $v0
+    jal find_max
+    move $t5 $v0
+    move $v1 $zero
     
     addiu  $v0  $zero  4           # print header
     la     $a0  bet_header
     syscall
     
-    # some code
+    BetLessThan:
+    
+    la $a0 point_total1			#Prints out the introtext
+    syscall
+    
+    li $v0 1				#Prints out point total
+    move $a0 $t7
+    syscall
+    
+    li $v0 4				#Prints out rest of intro text
+    la $a0 point_total2
+    syscall
+    
+    li $v0 5
+    syscall
+    move $t6 $v0
+    
+    ble $t6, $t7, CorrectBet
+    
+    li $v0 4				#BetExceeds
+    la $a0 over_bet
+    syscall
+    j BetLessThan
+    
+    CorrectBet:
+    li $v0 4
+    la $a0 new_line
+    syscall
+    la $a0 valid_indices
+    syscall
+    
+    li $v0 1				#Prints array size
+    move $a0 $t9
+    syscall
+    
+    li $v0 4
+    la $a0 index_guess
+    syscall
+    
+    li $v0 5
+    syscall
+
+    bne $v0 $t5 incorrect_guess
+    
+    
+    
+    incorrect_guess:
+    
+    ############    ############    ############    ############    ############    ############    ############
+    #
+    #FINISH  GUESS 
+    #
+    #
+    ############    ############    ############    ############    ############    ############    ############
 
     lw     $ra  ($sp)
     addi   $sp   $sp  4
 
     #--------------------------------
-    li     $v0   0xc0ffeeee        # setting test return value, REMOVE THIS LINE
+
     #--------------------------------
 
     jr     $ra
@@ -368,7 +447,7 @@ win_or_lose: nop
 cheat_header: .ascii  "------------------------------"
               .asciiz "\nCHEATER!\n\n"
 array_spacer: .asciiz ": " 
-new_line: .asciiz "\n"             
+
 
 .text
 print_array: nop
@@ -458,10 +537,12 @@ end_game: nop
 #--------------------------------------------------------------------
 get_array_size: nop
 move $t0, $a0
+move $v0, $zero
+move $t1, $zero
 SizeLoop:
 lw $t1, ($t0)
 beqz $t1 SizeOut
-addi $t0, $t0, 1
+addi $t0, $t0, 4
 addi $v0, $v0, 1
 b SizeLoop
 SizeOut:
