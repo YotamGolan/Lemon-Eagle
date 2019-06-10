@@ -363,7 +363,7 @@ print_s_regs("win_or_lose", "after")                           # display values 
 .data
 test_score_take_turn: .word 50                                 # score before entering subroutine <---------<---------<--------- SAFE TO MODIFY
 test_array_take_turn: .word 1 2 3 4 5 6 7 8 0                  # array before entering subroutine <---------<---------<--------- SAFE TO MODIFY
-test_user_select:     .word 2                                  # 1 = make bet, 2 = print array, 3 = quit <---------<---------<--------- SAFE TO MODIFY
+test_user_select:     .word 1                                  # 1 = make bet, 2 = print array, 3 = quit <---------<---------<--------- SAFE TO MODIFY
 
 .text
 print_testing_header("take_turn")

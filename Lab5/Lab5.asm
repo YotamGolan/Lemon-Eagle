@@ -1,18 +1,20 @@
 #-------------------------------------------------------------------------
-# Created by:  Last Name, First Name
-#              CruzID
+# Created by:  Golan, Yotam
+#              yogolan
 #              -- Month 2019
 #
 # Assignment:  Lab 5: A Gambling Game
 #              CMPE 012, Computer Systems and Assembly Language
 #              UC Santa Cruz, Spring 2019
 # 
-# Description: ---
-# 
-# Notes:       ---
+# Description: a terrible arcade game with little replay value
+#		after displaying initial welcome the entire game consists of looping through next turn page
+#		where 1 of 3 options is picked, either playing the game, cheating, or quitting
+#		playing involves wagering some portion of your points and then guess which index of the array is the largest
+#		correct guesses recieve that points, incorrect lose it
 #-------------------------------------------------------------------------
 
-jal end_game                       # this is to prevent the rest of
+#jal end_game                       # this is to prevent the rest of
                                    # the code executing unexpectedly
 
 #--------------------------------------------------------------------
@@ -25,32 +27,37 @@ jal end_game                       # this is to prevent the rest of
 #
 # return:     n/a
 #--------------------------------------------------------------------
-
+# registers
+# $t4, t5 are used to swap a0 and a1 as the instructions have them constantly flip meanings
+# $k0 is used for long term storage of current points
 .text
 play_game: nop
     
-    # some code                    # use $a1 to get the number of elements in the array
+    move $k0 $a0	#stores current points in k0
+    move $t4 $a0	#flips a0 and a1 around
+    move $a0 $a1
     
-    #--------------------------------
-    addiu $a0  $zero  8            # hard-coding the argument of array size for welcome subroutine
-                                   # DELETE THIS LINE AFTER IMPLEMENTING CODE TO GET ARRAY SIZE
-    #--------------------------------
+    
+    jal get_array_size
+    
+    move $t5 $v0	#stores array size
+    move $a0 $t4	#unflips a1 and a0
     
     jal   welcome
     
-    # some code
+    in_game:
     
     jal   prompt_options
-       
-    # some code
+
+    move $a3 $v0	#what option was picked
+    move $a0 $k0	#updates score
     
-    jal   take_turn
-    
-    # some code
+    jal   take_turn 
+    j in_game
     
     jal   end_game
     
-    jr    $ra
+    
 
 
 #--------------------------------------------------------------------
@@ -89,7 +96,7 @@ welcome: nop
     syscall
     
     addiu $v0  $zero  1           # print max array index
-    sub   $a0  $t0    1
+    move   $a0  $t5
     syscall
 
     addiu $v0  $zero  4           # print period
@@ -177,21 +184,34 @@ take_turn: nop
     
     # some code
     
-   beq $a3, 1, Betjump
-	beq $a3, 2, Winjump
-	beq $a3, 3, Printjump
+  	beq $a3, 1, Betjump	#decides what option was picked 1-3
+	beq $a3, 2, Cheatjump
+	beq $a3, 3, Quitjump
     	j end_game
-	Betjump:
-	jal    make_bet
+	Betjump:		#Betting
+	jal make_bet
+	move $k0 $v0		#stores new score from betting
 	j Fin
-	Winjump:
-	jal    win_or_lose
+	Cheatjump:
+	move $t4 $a0		#flips a1 and a0 because they get crossed in instructions given
+	move $a0 $a1
+	jal print_array
+	move $a0 $t4		#unflips a0 and a1
 	j Fin
-	Printjump:
-	jal    print_array
+	Quitjump:		
+	jal end_game		#quits
 	j Fin
 	Fin:
+	
+	# move $a0 $k0
 
+	move $t5 $a1		#flips a1 and a0 as needed for win/lose to work as instructed
+	move $a1 $a0
+	move $a0 $t5
+	jal win_or_lose
+	move $a1 $a0		#deflips a1 and a0 to meet requirements
+	move $a0 $t4
+	move $v0 $k0		#move points over to required position
     # some code
   
     #jal    end_game
@@ -200,7 +220,7 @@ take_turn: nop
     addi  $sp   $sp   4
     
     #--------------------------------
-    li     $v0   0xaabbccdd     # setting test return value, REMOVE THIS LINE
+
     #--------------------------------
         
     jr $ra
@@ -243,6 +263,7 @@ bet_header:   .ascii  "------------------------------"
             
 score_header: .ascii  "------------------------------"
               .asciiz "\nCURRENT SCORE\n\n"
+score_header2: .asciiz " pts \n"
               
 point_total1: .asciiz "You currently have "      
 point_total2: .ascii " points.\n"  
@@ -255,8 +276,13 @@ wrong_guess:   .asciiz "Your guess is incorrect! The maximum value is not in ind
 point_loss:    .asciiz ". \n\nYou lost "
 point_loss2:    .asciiz " points."
 
+point_gain:	.asciiz "\n\nYou earned "
+point_gain2:	.ascii " points!\n\n"
+point_gain3:	.asciiz "This value has been removed from the array."
+
 right_guess:   .asciiz "Score! Index "
 right_guess2:  .asciiz " has the maximum value in the array."
+
             
 # add more strings
 
@@ -270,11 +296,11 @@ make_bet: nop
     addi $t7 $a0 0
     move $t8 $a1			#Stores values in temp storage
     
-    move $a0 $t8
+    move $a0 $t8			#flips a0 and a1 t0 suit getarraysizes needs
     jal get_array_size
-    move $t9 $v0
+    move $t9 $v0			#unflips
     jal find_max
-    move $t5 $v0
+    move $t5 $v0			
     move $v1 $zero
     
     addiu  $v0  $zero  4           # print header
@@ -294,18 +320,18 @@ make_bet: nop
     la $a0 point_total2
     syscall
     
-    li $v0 5
+    li $v0 5				#stores user input for point gambled
     syscall
     move $t6 $v0
     
     ble $t6, $t7, CorrectBet
     
     li $v0 4				#BetExceeds
-    la $a0 over_bet
+    la $a0 over_bet			#Points gambled more then points possessed
     syscall
-    j BetLessThan
+    j BetLessThan			#reprompts
     
-    CorrectBet:
+    CorrectBet:				#valid point sum given
     li $v0 4
     la $a0 new_line
     syscall
@@ -316,26 +342,105 @@ make_bet: nop
     move $a0 $t9
     syscall
     
-    li $v0 4
+    li $v0 4				#where do you think it is?
     la $a0 index_guess
     syscall
     
-    li $v0 5
+    li $v0 5				#prompts for previous question
     syscall
 
-    bne $v0 $t5 incorrect_guess
+    move $t9 $v0			#saves it
+    
+    li $v0 4
+    la $a0 new_line
+    syscall
+    
+    bne $t9 $t5 incorrect_guess		#guessed wrong
+    b correct_guess			#guess right
     
     
+    incorrect_guess:			
+   
+    li $v0 4				#tells you it was wrong
+    la $a0 wrong_guess
+    syscall
     
-    incorrect_guess:
+    li $v0 1				#Prints guess size
+    move $a0 $t9
+    syscall
     
-    ############    ############    ############    ############    ############    ############    ############
-    #
-    #FINISH  GUESS 
-    #
-    #
-    ############    ############    ############    ############    ############    ############    ############
+    li $v0 4
+    la $a0 point_loss
+    syscall
+    
+    li $v0 1				#Prints guess size
+    move $a0 $t6
+    syscall
+    
+    li $v0 4
+    la $a0 point_loss2
+    syscall
+    
+    sub $t0 $t7 $t6			#subtracts point total
+    
+    j end_guess_loop
+    
+    correct_guess:
+    li $v0 4				#guess right, and prints it
+    la $a0 right_guess
+    syscall
+    
+    li $v0 1				#Prints guess size
+    move $a0 $t9
+    syscall
+    
+    li $v0 4
+    la $a0 right_guess2
+    syscall
+    
+    move $a1 $t9			#reasserts a1 and a0 from storage
+    move $a0 $t8
+    jal mod_array			#modifies array
+    
+    add $t0 $t7 $t6			#adds points to current sum
+    
+    li $v0 4
+    la $a0 point_gain
+    syscall
+    
+    li $v0 1				#Prints guess size
+    move $a0 $t6
+    syscall
+    
+    li $v0 4
+    la $a0 point_gain2
+    syscall
+    
+    j end_guess_loop
 
+ 
+    end_guess_loop:
+    
+    li $v0 4				#new line!
+    la $a0 new_line
+    syscall
+    syscall
+    
+    la $a0 score_header			#prints out new point total in currect format
+    syscall
+    li $v0 1
+    move $a0 $t0
+    syscall
+    li $v0 4
+    la $a0 score_header2
+    syscall
+    la $a0 new_line
+    syscall
+    
+    move $v0 $t0			#reasserts registeries
+    move $a0 $t7
+    move $a1 $t8
+    
     lw     $ra  ($sp)
     addi   $sp   $sp  4
 
@@ -359,25 +464,28 @@ make_bet: nop
 #--------------------------------------------------------------------
 #
 # REGISTER USE
-# 
+# t0 t2 v1 temp storage
 #--------------------------------------------------------------------
 
 .text
 find_max: nop
 
     # some code
-    move $t0, $a0
-    li $v1, -1
-    FindMaxLoop:
-	lw $t1, ($t0)
-	beqz $t1 SizeOut
-	bgt $t1, $v1, Bigger
-	j Smaller
+    move $t0, $a0		#stores a0
+    move $v0, $zero		#resets v0 t2 v1
+    li $t2 -1			
+    li $v1 -1
+    FindMaxLoop:		#loops through array finding largest value
+	lw $t1, ($t0)		#loads the currently selected value
+	beqz $t1 SizeOut	#if loaded a 0 you are finished
+	addiu $t2, $t2 1	#current index
+	bgt $t1, $v1, Bigger	#new biggest value
+	j Smaller		#not bigger
 	Bigger:
-	move $v1, $t1
-	move $v0, $t0
+	move $v1, $t1		#saves its location and value
+	move $v0 $t2
 	Smaller:
-	addiu $t0, $t0, 4 
+	addiu $t0, $t0, 4 	#increments by a word and continues
 	j FindMaxLoop
 
 
@@ -396,7 +504,7 @@ find_max: nop
 #--------------------------------------------------------------------
 #
 # REGISTER USE
-# 
+# t7 t8 t9 temporary storage
 #--------------------------------------------------------------------
 
 .data
@@ -409,23 +517,37 @@ lose_msg: .ascii   "------------------------------"
 .text
 win_or_lose: nop
 
-    move $t9, $ra
-    jal find_max
- 
-    beq $v1, -1, Win
-    beqz $s1, Lose
-    jr $t9
+    move $t9, $ra	#stores stack point
+    jal find_max	#finds the max, if -1 then you are finished
     
-    Win:
+    move $t7 $a0	#saves these
+    move $t8 $a1
+ 
+    beq $v1, -1, Win	#if biggest is -1, then you ahve won
+    beqz $k0, Lose	#if point total = 0 you have lost
+    jr $t9		#else continue
+    
+    li $v0 10
+    syscall
+    
+    Win:		#prints winner message then end game
     addiu  $v0  $zero  4
     la     $a0  win_msg
     syscall
     
-    # some code
+  j end_game
+    			#prints loser message then ends game
     Lose:
     addiu  $v0  $zero  4
     la     $a0  lose_msg
     syscall
+    
+    li $v0 10
+    syscall
+    
+    move $a0 $t7	#reasserts a0 a1
+    move $a1 $t8
+    j end_game
 
     jr     $t9
 
@@ -441,6 +563,7 @@ win_or_lose: nop
 # REGISTER USE
 # $a0: syscalls
 # $v0: syscalls
+# $t0 t1 t2 t3 temporary storage
 #--------------------------------------------------------------------
 
 .data
@@ -451,9 +574,10 @@ array_spacer: .asciiz ": "
 
 .text
 print_array: nop
-	move $t0, $zero
+	move $t0, $zero			#zeroes all the things
 	move $t1, $zero
 	move $t2, $zero
+	move $t3 $a0
 
 	move $t0, $a0			#Saves array start Location	
     
@@ -463,30 +587,32 @@ print_array: nop
     
     	
     
-	ArrayPrintLoop:
+	ArrayPrintLoop:		#loops through array 
 	lw $t1, ($t0)
-	beqz $t1 SizeOut
+	beqz $t1 SizeOut	#stops when hit a 0
 	
-	li $v0, 1
+	li $v0, 1		#prints current index
 	move $a0, $t2
 	syscall
 	
-	li $v0, 4
+	li $v0, 4		#prints the spacer
 	la $a0  array_spacer
 	syscall
 	
-	li $v0, 1
+	li $v0, 1		#prints word
 	move $a0, $t1
 	syscall
 	
-	li $v0, 4
+	li $v0, 4		#new line
 	la $a0  new_line
 	syscall
 	
-	addi $t2, $t2, 1
+	addi $t2, $t2, 1	#increments values
 	addi $t0, $t0, 4
 	j ArrayPrintLoop
-    
+	
+	
+    	move $a0 $t3
 	jr     $ra
 
 
@@ -537,12 +663,12 @@ end_game: nop
 #--------------------------------------------------------------------
 get_array_size: nop
 move $t0, $a0
-move $v0, $zero
+addiu $v0, $zero, -1
 move $t1, $zero
-SizeLoop:
-lw $t1, ($t0)
-beqz $t1 SizeOut
-addi $t0, $t0, 4
+SizeLoop:		#loops until hits 0
+lw $t1, ($t0)		#loads the word
+beqz $t1 SizeOut	#stops if its 0
+addi $t0, $t0, 4	#increments and continues
 addi $v0, $v0, 1
 b SizeLoop
 SizeOut:
@@ -602,4 +728,17 @@ jr $ra
 #             $a1 - index of the maximum element in the array
 # 
 # return:     n/a
+mod_array: nop
+move $t0 $a0
+li $t1 0
+li $t2 -1	
+modloop:	
+beq $t1 $a1 modloopout	#found desired index, stop
+addiu $t0 $t0 4		#increments until found correct index
+addiu $t1 $t1 1
+j modloop
+modloopout:
+
+sw $t2 ($t0) 		#replaces current index with -1
+jr $ra
 #--------------------------------------------------------------------
