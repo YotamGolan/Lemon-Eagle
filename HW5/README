@@ -1,0 +1,8 @@
+Files submitted: README, Makefile, Bard.jar, Hasher.jar, Word.jar
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//-----------------------------------------------------------------------------
+How to run: Use the included Makefile, then run java -jar Bard.jar "<INPUT TXT FILE>" "<OUTPUT TXT FILE>" 
+Will output solutions to output txt file
+
+https://www.geeksforgeeks.org/comparator-interface-java/

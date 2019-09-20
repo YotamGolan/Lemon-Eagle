@@ -1,0 +1,10 @@
+Files submitted: README, Makefile, Queens.java, NQueens.java, NQueensSolution.java
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//-----------------------------------------------------------------------------
+How to run: Use the included Makefile, then run java -jar NQueens.jar "<INPUT TXT FILE>" "<OUTPUT TXT FILE>" 
+Will output solutions to output txt file
+
+SOURCES:
+https://stackoverflow.com/questions/26227877/n-queens-program-using-stack-and-backtracking
+for formating and general stack help

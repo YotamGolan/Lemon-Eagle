@@ -1,0 +1,6 @@
+Files submitted: README, Makefile, ChessBoard.java, Chesspiece.java, King.java, Knight.java, Linkedlist.java, node.java, Queen.java, Rook.java, Pawn.java
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//-----------------------------------------------------------------------------
+How to run: Use the included Makefile, then run java -jar ChessBoard.jar "<INPUT TXT FILE>" "<OUTPUT TXT FILE>" 
+Will output solutions to output txt file
