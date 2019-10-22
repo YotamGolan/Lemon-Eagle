@@ -1,0 +1,7 @@
+Hello drakonizer
+Operating system: Linux 4.15.0-34-generic
+Runtime environment: OpenJDK Runtime Environment 1.8.0_181-8u181-b13-0ubuntu0.18.04.1-b13
+Virtual machine: OpenJDK 64-Bit Server VM 25.181-b13
+Java home directory: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Free memory: 250337024 bytes
+Time: Thu Oct 11 17:38:30 PDT 2018.

@@ -1,0 +1,7 @@
+Files Submitted: HelloUser.java, HelloUser2.java, Makefile1, Makefile2, Makefile3, README.
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//HelloUser and HelloUser2 are the sole running files in this project.
+//HelloUser prints Hello + GIT username, HelloUser2 prints Hello + a suite of computer specs
+//HelloUser can be run with either Makefile1 or Makefile2, the difference being Makefile2 uses macros. HelloUser2 is run with Makefile3.
+//-----------------------------------------------------------------------------

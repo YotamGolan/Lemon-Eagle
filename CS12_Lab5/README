@@ -1,0 +1,6 @@
+Files submitted: README, Makefile, queue.c, queue.h, queueClient.c
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//-----------------------------------------------------------------------------
+How to run: Use the included Makefile, then run ./queueClient "in.txt" "out.txt"
+Will output solutions to output txt file

@@ -1,0 +1,6 @@
+Files submitted: README, Makefile, fileReverse.c, gettysburg.txt, gettysburg-reversed.txt
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//-----------------------------------------------------------------------------
+How to run: Use the included Makefile, then run ./fileReverse "Gettysburg.txt" "Gettysburg-reversed.txt"
+Will output solutions to output txt file

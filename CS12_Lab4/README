@@ -1,0 +1,6 @@
+Files submitted: README, Makefile, charType.c
+//-----------------------------------------------------------------------------
+//Yotam Golan, ID:yogolan
+//-----------------------------------------------------------------------------
+How to run: Use the included Makefile, then run ./charType "in.txt" "out.txt"
+Will output solutions to output txt file

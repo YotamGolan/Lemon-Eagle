@@ -1,0 +1,7 @@
+FileReverse.java, Makefile, gettysburg.txt, README
+//-----------------------------------------------------------------------------
+// Yotam Golan, ID:yogolan
+//FileReverse is the sole file in this project
+//It takes in input .txt files and outputs a named file that is a reverse of it
+//File ran by running Makefile and then running the created .jar
+//-----------------------------------------------------------------------------
